@@ -524,3 +524,5 @@ button:focus-visible, a:focus-visible { outline: 3px solid #1a5fb4; outline-offs
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+.version { margin: 8px 0 0; text-align: center; color: var(--muted); font-size: 0.85rem; }

@@ -4,6 +4,7 @@
    Без сервера и без регистрации: прогресс хранится в localStorage телефона.
    Тексты уроков — в content.json. */
 
+const APP_VERSION = 3;            // показывается внизу главного экрана
 const STORAGE_KEY = 'duolat:v1';
 const INSTALL_DISMISS_KEY = 'duolat:installDismissed';
 const XP_PER_LESSON = 10;
@@ -529,6 +530,7 @@ function renderHome() {
 
       <p class="draft-note">Прототип. Латышские тексты ещё не проверены носителем языка.</p>
       <a class="link-btn block" href="#/check">🎙️ Проверить звук и микрофон</a>
+      <p class="version">Версия ${APP_VERSION}</p>
     </section>`;
 
   $app.querySelectorAll('[data-lesson]').forEach((b) => b.addEventListener('click', () => {
