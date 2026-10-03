@@ -1,6 +1,6 @@
 // Duolat service worker: приложение открывается и без интернета.
 // При изменении файлов приложения увеличь номер версии.
-const CACHE = 'duolat-v1';
+const CACHE = 'duolat-v2';
 
 const SHELL = [
   './',
@@ -18,7 +18,7 @@ const SHELL = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting())
+    caches.open(CACHE).then((cache) => cache.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting())
   );
 });
 

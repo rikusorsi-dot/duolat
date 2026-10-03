@@ -160,8 +160,22 @@ const caps = {
   lvVoice: null,
   voicesReady: false,
 };
+const NO_REC_KEY = 'duolat:noRecognition';
+
+function recognitionBlocked() {
+  // На iPhone распознавание латышского не работает: микрофон включается, но ответа нет.
+  if (isIOS()) return true;
+  try { return localStorage.getItem(NO_REC_KEY) === '1'; } catch (e) { return false; }
+}
+
 // recognition — проверяем произношение; voice — только слышим голос; none — микрофона нет.
-let speechMode = caps.recognition ? 'recognition' : caps.mic ? 'voice' : 'none';
+let speechMode = caps.recognition && !recognitionBlocked() ? 'recognition' : caps.mic ? 'voice' : 'none';
+
+// Распознавание на этом телефоне не работает — дальше засчитываем по голосу (и запоминаем).
+function disableRecognition(remember) {
+  speechMode = caps.mic ? 'voice' : 'none';
+  if (remember) { try { localStorage.setItem(NO_REC_KEY, '1'); } catch (e) { /* нет хранилища */ } }
+}
 
 function findLvVoice() {
   if (!caps.synth) return null;
@@ -255,38 +269,83 @@ function bindSpeakerButtons(root) {
 let activeRec = null;
 let activeVoice = null;
 
+// Ошибки, после которых распознавание на этом телефоне не пробуем.
+const REC_BROKEN = ['timeout', 'language-not-supported', 'service-not-allowed', 'not-supported', 'start-failed', 'bad-grammar'];
+
 function recognizeOnce() {
   return new Promise((resolve, reject) => {
     let rec;
     try { rec = new Rec(); } catch (e) { reject('not-supported'); return; }
     rec.lang = 'lv-LV';
-    rec.interimResults = false;
+    rec.interimResults = true;
     rec.maxAlternatives = 5;
     rec.continuous = false;
-    const results = [];
+    const finals = [];
+    let interim = '';
     let error = null;
-    const timer = setTimeout(() => { try { rec.stop(); } catch (e) { /* уже остановлен */ } }, 9000);
+    let settled = false;
+    let graceTimer = 0;
+
+    // reason === 'timeout': распознавание так и не ответило (бывает на iPhone и во встроенных браузерах).
+    const settle = (reason) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(stopTimer);
+      clearTimeout(hardTimer);
+      clearTimeout(graceTimer);
+      activeRec = null;
+      const results = finals.length ? finals : interim ? [interim] : [];
+      if (results.length) resolve(results);
+      else if (reason === 'timeout') reject('timeout');
+      else if (error && error !== 'no-speech' && error !== 'aborted') reject(error);
+      else resolve([]);
+    };
+
+    const stopTimer = setTimeout(() => { try { rec.stop(); } catch (e) { /* уже остановлен */ } }, 8000);
+    const hardTimer = setTimeout(() => { try { rec.abort(); } catch (e) { /* уже остановлен */ } settle('timeout'); }, 11000);
+
     rec.onresult = (e) => {
-      for (const res of e.results) for (let i = 0; i < res.length; i++) results.push(res[i].transcript);
+      let now = '';
+      for (let r = e.resultIndex || 0; r < e.results.length; r++) {
+        const res = e.results[r];
+        if (res.isFinal) { for (let i = 0; i < res.length; i++) finals.push(res[i].transcript); }
+        else now += res[0].transcript;
+      }
+      interim = now;
     };
     rec.onerror = (e) => { error = e.error || 'error'; };
-    rec.onend = () => {
-      clearTimeout(timer);
-      activeRec = null;
-      if (error && error !== 'no-speech' && error !== 'aborted') reject(error);
-      else resolve(results);
+    rec.onend = () => settle();
+
+    activeRec = {
+      // «Я закончил»: ждём ответ ещё 2 секунды, потом считаем, что распознавание зависло.
+      stop() {
+        try { rec.stop(); } catch (e) { /* уже остановлен */ }
+        graceTimer = setTimeout(() => settle('timeout'), 2000);
+      },
+      abort() {
+        try { rec.abort(); } catch (e) { /* уже остановлен */ }
+        settle();
+      },
     };
-    activeRec = rec;
-    try { rec.start(); } catch (e) { clearTimeout(timer); activeRec = null; reject('start-failed'); }
+    try { rec.start(); } catch (e) { settled = true; clearTimeout(stopTimer); clearTimeout(hardTimer); activeRec = null; reject('start-failed'); }
   });
 }
 
 // Режим без распознавания: слушаем микрофон и проверяем, что голос действительно звучал.
+// Вызывать прямо из нажатия: iPhone «будит» звук только в момент нажатия, иначе микрофон слышит тишину.
 async function startVoiceSession(onLevel) {
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
   const AC = window.AudioContext || window.webkitAudioContext;
   const ctx = new AC();
-  if (ctx.resume) await ctx.resume();
+  const resumed = ctx.resume ? ctx.resume().catch(() => {}) : Promise.resolve();
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (e) {
+    ctx.close().catch(() => {});
+    throw e;
+  }
+  await resumed;
+  if (ctx.state === 'suspended') await ctx.resume().catch(() => {});
   const analyser = ctx.createAnalyser();
   analyser.fftSize = 1024;
   ctx.createMediaStreamSource(stream).connect(analyser);
@@ -815,6 +874,7 @@ function taskBuild(t) {
 function taskSpeak(t) {
   let root = null;
   let tries = 0;
+  let emptyTries = 0;
   let busy = false;
   let passed = false;
 
@@ -864,9 +924,12 @@ function taskSpeak(t) {
     b.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
-  function switchToVoiceMode() {
-    speechMode = caps.mic ? 'voice' : 'none';
+  function switchToVoiceMode(remember) {
+    disableRecognition(remember);
     setMic(speechMode === 'none' ? 'off' : 'idle', modeHint());
+    setStatus(speechMode === 'voice'
+      ? 'Проверить произношение на этом телефоне не получается. Не страшно: нажми на микрофон ещё раз, скажи фразу и нажми снова — засчитаю по голосу.'
+      : 'Микрофон в этом браузере недоступен. Открой Duolat в Chrome (Android) или Safari (iPhone).');
   }
 
   async function useRecognition() {
@@ -884,17 +947,16 @@ function taskSpeak(t) {
         setStatus('Нет доступа к микрофону.' + MIC_HELP);
         return;
       }
-      // Распознавание латышского недоступно (нет сети, iPhone без поддержки и т.п.) — переходим на проверку голоса.
-      switchToVoiceMode();
-      setStatus(speechMode === 'voice'
-        ? 'Проверить произношение сейчас не получается. Не страшно: нажми на микрофон ещё раз и скажи фразу — засчитаю по голосу.'
-        : 'Микрофон в этом браузере недоступен. Открой Duolat в Chrome (Android) или Safari (iPhone).');
+      // Распознавание латышского недоступно (нет сети, телефон не поддерживает, зависло) — переходим на проверку голоса.
+      switchToVoiceMode(REC_BROKEN.includes(err));
       return;
     }
     busy = false;
     if (passed || !root.isConnected) return;
     setMic('idle', modeHint());
     if (!alts.length) {
+      emptyTries += 1;
+      if (emptyTries >= 2) { switchToVoiceMode(false); return; }
       setStatus('Не слышно. Нажми на микрофон и скажи чуть громче.');
       return;
     }
@@ -960,7 +1022,7 @@ function taskSpeak(t) {
         if (passed) return;
         if (busy) {
           // Повторное нажатие — «я закончил»: распознавание отдаёт то, что уже услышало.
-          if (activeRec) { try { activeRec.stop(); } catch (e) { /* уже остановлен */ } } else stopMic();
+          if (activeRec) activeRec.stop(); else stopMic();
           return;
         }
         stopSpeaking();
@@ -1054,7 +1116,8 @@ function renderCheck() {
   const mic = document.getElementById('t-mic');
   const status = document.getElementById('t-status');
   if (mic) mic.addEventListener('click', async () => {
-    if (activeRec || activeVoice) { stopMic(); return; }
+    if (activeRec) { activeRec.stop(); return; }
+    if (activeVoice) { stopMic(); return; }
     status.textContent = 'Слушаю… скажи «Labdien!»';
     if (speechMode === 'recognition') {
       try {
@@ -1064,7 +1127,7 @@ function renderCheck() {
         status.textContent = `Услышано: «${alts[0]}» — ${s >= SPEAK_PASS ? 'отлично ✓' : 'похоже не совсем, попробуй ещё'}`;
       } catch (err) {
         if (err === 'not-allowed' || err === 'audio-capture') { status.innerHTML = 'Нет доступа к микрофону.' + MIC_HELP; return; }
-        speechMode = caps.mic ? 'voice' : 'none';
+        disableRecognition(REC_BROKEN.includes(err));
         status.textContent = `Распознавание не сработало (${err}). Задания «Скажи вслух» будут засчитываться по голосу.`;
       }
     } else {
@@ -1147,7 +1210,17 @@ async function init() {
   });
 
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
-  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+  if ('serviceWorker' in navigator) {
+    // Пришла новая версия приложения — один раз перезагружаемся, если не идёт урок.
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController || reloaded || lesson) return;
+      reloaded = true;
+      location.reload();
+    });
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
 }
 
 init();
