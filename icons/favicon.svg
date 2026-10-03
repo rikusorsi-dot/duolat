@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#9E3039"/>
+  <path d="M150 120h212a60 60 0 0 1 60 60v120a60 60 0 0 1-60 60H236l-86 70v-70a60 60 0 0 1-60-60V180a60 60 0 0 1 60-60z" fill="#fff"/>
+  <text x="256" y="318" text-anchor="middle" font-family="DejaVu Sans, Arial, sans-serif" font-weight="700" font-size="190" fill="#9E3039">Ā</text>
+</svg>

@@ -1,0 +1,229 @@
+{
+  "_meta": {
+    "version": 1,
+    "level": "A1",
+    "reviewStatus": "ТРЕБУЕТ ПРОВЕРКИ НОСИТЕЛЕМ ЯЗЫКА",
+    "note": "Все латышские фразы и переводы в этом файле — черновик. Перед показом ученикам их должен проверить носитель латышского языка: написание, долготы (ā, ē, ī, ū), падежи, естественность фраз.",
+    "howToEdit": "Типы заданий: choose — выбрать перевод; listen — послушать и выбрать; build — собрать фразу из слов; speak — сказать вслух (обязательно минимум одно в уроке). В choose и listen поле answer должно совпадать с одним из options буква в букву. В build фраза lv разбивается на слова по пробелам, extraWords — лишние слова-отвлекалки.",
+    "audioHowTo": "Если записать фразу голосом носителя, положи файл в папку audio/ и добавь строку в раздел audio: \"Labdien!\": \"audio/labdien.mp3\". Тогда вместо синтезатора будет звучать живой голос."
+  },
+  "audio": {},
+  "lessons": [
+    {
+      "id": "l1-greetings",
+      "title": "Приветствие",
+      "subtitle": "Здороваемся и прощаемся",
+      "icon": "👋",
+      "needsNativeReview": true,
+      "tip": "Ударение в латышском почти всегда на первом слоге: LAB-dien, PAL-dies. Чёрточка над буквой (ā, ē, ī, ū) значит, что звук тянется дольше.",
+      "tasks": [
+        {
+          "type": "choose",
+          "question": "Добрый день!",
+          "questionLang": "ru",
+          "options": ["Labdien!", "Labvakar!", "Paldies!"],
+          "optionsLang": "lv",
+          "answer": "Labdien!"
+        },
+        {
+          "type": "choose",
+          "question": "Paldies!",
+          "questionLang": "lv",
+          "options": ["Спасибо!", "Пожалуйста!", "До свидания!"],
+          "optionsLang": "ru",
+          "answer": "Спасибо!"
+        },
+        {
+          "type": "listen",
+          "lv": "Labrīt!",
+          "ru": "Доброе утро!",
+          "options": ["Labrīt!", "Labvakar!", "Labdien!"],
+          "optionsLang": "lv",
+          "answer": "Labrīt!"
+        },
+        {
+          "type": "choose",
+          "question": "До свидания!",
+          "questionLang": "ru",
+          "options": ["Uz redzēšanos!", "Lūdzu!", "Sveiki!"],
+          "optionsLang": "lv",
+          "answer": "Uz redzēšanos!"
+        },
+        {
+          "type": "speak",
+          "lv": "Labdien!",
+          "ru": "Добрый день!"
+        },
+        {
+          "type": "listen",
+          "lv": "Kā jums iet?",
+          "ru": "Как у вас дела?",
+          "options": ["Kā jums iet?", "Kā jūs sauc?", "Kur jūs dzīvojat?"],
+          "optionsLang": "lv",
+          "answer": "Kā jums iet?"
+        },
+        {
+          "type": "build",
+          "ru": "Как у вас дела?",
+          "lv": "Kā jums iet?",
+          "extraWords": ["labi", "jūs"]
+        },
+        {
+          "type": "build",
+          "ru": "Хорошо, спасибо!",
+          "lv": "Labi, paldies!",
+          "extraWords": ["lūdzu", "slikti"]
+        },
+        {
+          "type": "speak",
+          "lv": "Labi, paldies!",
+          "ru": "Хорошо, спасибо!"
+        }
+      ]
+    },
+    {
+      "id": "l2-introductions",
+      "title": "Знакомство",
+      "subtitle": "Как тебя зовут, где живёшь",
+      "icon": "🤝",
+      "needsNativeReview": true,
+      "tip": "«Jūs» — вежливое «вы». С незнакомыми взрослыми, в магазине и в учреждениях говори «jūs».",
+      "tasks": [
+        {
+          "type": "choose",
+          "question": "Меня зовут Анна.",
+          "questionLang": "ru",
+          "options": ["Mani sauc Anna.", "Es dzīvoju Rīgā.", "Patīkami iepazīties!"],
+          "optionsLang": "lv",
+          "answer": "Mani sauc Anna."
+        },
+        {
+          "type": "listen",
+          "lv": "Kā jūs sauc?",
+          "ru": "Как вас зовут?",
+          "options": ["Kā jūs sauc?", "Kā jums iet?", "Kur jūs dzīvojat?"],
+          "optionsLang": "lv",
+          "answer": "Kā jūs sauc?"
+        },
+        {
+          "type": "choose",
+          "question": "Patīkami iepazīties!",
+          "questionLang": "lv",
+          "options": ["Приятно познакомиться!", "Как вас зовут?", "Я живу в Риге."],
+          "optionsLang": "ru",
+          "answer": "Приятно познакомиться!"
+        },
+        {
+          "type": "speak",
+          "lv": "Patīkami iepazīties!",
+          "ru": "Приятно познакомиться!"
+        },
+        {
+          "type": "build",
+          "ru": "Я живу в Риге.",
+          "lv": "Es dzīvoju Rīgā.",
+          "extraWords": ["runāju", "jūs"]
+        },
+        {
+          "type": "choose",
+          "question": "Я говорю по-русски.",
+          "questionLang": "ru",
+          "options": ["Es runāju krieviski.", "Es runāju latviski.", "Es dzīvoju Rīgā."],
+          "optionsLang": "lv",
+          "answer": "Es runāju krieviski."
+        },
+        {
+          "type": "listen",
+          "lv": "Es mācos latviešu valodu.",
+          "ru": "Я учу латышский язык.",
+          "options": ["Я учу латышский язык.", "Я говорю по-русски.", "Я живу в Риге."],
+          "optionsLang": "ru",
+          "answer": "Я учу латышский язык."
+        },
+        {
+          "type": "build",
+          "ru": "Меня зовут Анна.",
+          "lv": "Mani sauc Anna.",
+          "extraWords": ["Kā", "jūs"]
+        },
+        {
+          "type": "speak",
+          "lv": "Es mācos latviešu valodu.",
+          "ru": "Я учу латышский язык."
+        }
+      ]
+    },
+    {
+      "id": "l3-shop",
+      "title": "Магазин",
+      "subtitle": "Хлеб, молоко, касса",
+      "icon": "🛒",
+      "needsNativeReview": true,
+      "tip": "На кассе часто спрашивают: «Vai vajag maisiņu?» — «Пакет нужен?». Хватит короткого ответа: «Nē, paldies» или «Jā, lūdzu».",
+      "tasks": [
+        {
+          "type": "choose",
+          "question": "хлеб",
+          "questionLang": "ru",
+          "options": ["maize", "piens", "ūdens"],
+          "optionsLang": "lv",
+          "answer": "maize"
+        },
+        {
+          "type": "choose",
+          "question": "piens",
+          "questionLang": "lv",
+          "options": ["молоко", "вода", "хлеб"],
+          "optionsLang": "ru",
+          "answer": "молоко"
+        },
+        {
+          "type": "listen",
+          "lv": "Cik tas maksā?",
+          "ru": "Сколько это стоит?",
+          "options": ["Cik tas maksā?", "Kas tas ir?", "Cik ir pulkstenis?"],
+          "optionsLang": "lv",
+          "answer": "Cik tas maksā?"
+        },
+        {
+          "type": "speak",
+          "lv": "Cik tas maksā?",
+          "ru": "Сколько это стоит?"
+        },
+        {
+          "type": "choose",
+          "question": "У вас есть молоко?",
+          "questionLang": "ru",
+          "options": ["Vai jums ir piens?", "Cik maksā piens?", "Tas būs viss."],
+          "optionsLang": "lv",
+          "answer": "Vai jums ir piens?"
+        },
+        {
+          "type": "build",
+          "ru": "Сколько это стоит?",
+          "lv": "Cik tas maksā?",
+          "extraWords": ["ir", "Kas"]
+        },
+        {
+          "type": "listen",
+          "lv": "Vai vajag maisiņu?",
+          "ru": "Пакет нужен?",
+          "options": ["Пакет нужен?", "Это всё?", "У вас есть молоко?"],
+          "optionsLang": "ru",
+          "answer": "Пакет нужен?"
+        },
+        {
+          "type": "build",
+          "ru": "Я заплачу картой.",
+          "lv": "Es maksāšu ar karti.",
+          "extraWords": ["naudu", "jūs"]
+        },
+        {
+          "type": "speak",
+          "lv": "Man, lūdzu, maizi.",
+          "ru": "Мне, пожалуйста, хлеб."
+        }
+      ]
+    }
+  ]
+}
